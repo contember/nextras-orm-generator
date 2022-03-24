@@ -1,0 +1,86 @@
+#!/usr/bin/env php
+<?php declare(strict_types=1);
+
+use Contember\NextrasOrmGenerator\Config;
+use Contember\NextrasOrmGenerator\OrmGeneratorFactory;
+use Contember\NextrasOrmGenerator\SchemaFetcher;
+
+if (is_file(__DIR__ . '/../vendor/autoload.php')) {
+	require __DIR__ . '/../vendor/autoload.php';
+
+} elseif (is_file(__DIR__ . '/../../../autoload.php')) {
+	require __DIR__ . '/../../../autoload.php';
+}
+
+function parseArgs(array $argv)
+{
+	$args = [];
+	$lastArgName = null;
+	foreach (array_slice($argv, 1) as $arg) {
+		if (preg_match('~^--(\w+)(?:=(.+))?$~', $arg, $matches)) {
+			$name = $matches[1];
+			$value = $matches[2] ?? null;
+			$args[$name] = $value ?? true;
+			$lastArgName = $value === null ? $name : null;
+		} elseif ($lastArgName !== null) {
+			$args[$lastArgName] = $arg;
+		} else {
+			$args[] = $arg;
+		}
+	}
+	return $args;
+}
+
+$args = parseArgs($argv);
+if (count($args) === 0) {
+	echo <<<DOC
+
+This command takes Contember schema introspection and generates Nextras ORM entities, repositories, mappers etc.
+
+Output options:
+	--dir=... output directory [REQUIRED]
+	--baseNamespace=... default App
+	--coreNamespace=... default App\Core
+	--repositoryNamespace=... default App\Orm\Repository
+	--entityNamespace=... default App\Orm\Entity
+	--mapperNamespace=... default App\Orm\Mapper
+	--collectionNamespace=... default App\Orm\Collection
+	--enumNamespace=... default App\Orm\Enum
+	--modelClassName=... default App\Orm\Model
+Input options:
+	--file=... Contember introspection JSON file
+	--endpoint=... Contember project endpoint for fetching live schema
+	--token=... Contember bearer authentication token
+
+Examples:
+	Passing schema from a file:
+	php ./vendor/bin/contember-nextras-orm-generator --dir app/ --file schema.json
+
+	Fetching schema from running server:
+	php ./vendor/bin/contember-nextras-orm-generator --dir app/ --endpoint http://api.example.eu.contember.cloud/content/my-project/live --token 123456789
+	
+	Passing schema through stdin:
+	cat schema.json | php ./vendor/bin/contember-nextras-orm-generator --dir app/
+
+
+DOC;
+	exit;
+}
+$rc = new ReflectionClass(Config::class);
+$configArgs = array_map(fn(\ReflectionParameter $param) => $param->getName(), $rc->getConstructor()->getParameters());
+
+$config = new Config(...array_intersect_key($args, array_fill_keys($configArgs, true)));
+$generator = (new OrmGeneratorFactory())->create($config);
+
+if (isset($args['endpoint'])) {
+	$fetcher = new SchemaFetcher();
+	$schema = $fetcher->fetchSchema($args['endpoint'], $args['token']);
+} elseif (isset($args['file'])) {
+	$schema = json_decode(file_get_contents($args['file']));
+} else {
+	$schema = json_decode(file_get_contents("php://stdin"));
+}
+
+$generator->generate($schema);
+
+

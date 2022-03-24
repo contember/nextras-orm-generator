@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+docker run --rm --interactive --tty \
+  --env COMPOSER_HOME=/tmp/.config/composer \
+  --env COMPOSER_CACHE_DIR=/tmp/.cache/composer \
+  --volume ${COMPOSER_HOME:-$HOME/.config/composer}:/tmp/.config/composer \
+  --volume ${COMPOSER_CACHE_DIR:-$HOME/.cache/composer}:/tmp/.cache/composer \
+  --volume $PWD:/app \
+  --volume $SSH_AUTH_SOCK:/ssh-auth.sock \
+  --volume /etc/passwd:/etc/passwd:ro \
+  --volume /etc/group:/etc/group:ro \
+  --env SSH_AUTH_SOCK=/ssh-auth.sock \
+  --user $(id -u):$(id -u) \
+  composer:2 "$@"

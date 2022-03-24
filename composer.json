@@ -1,0 +1,26 @@
+{
+    "name": "contember/nextras-orm-generator",
+    "description": "Generate nextras ORM model from Contember schema",
+    "type": "library",
+    "bin": [
+        "bin/contember-nextras-orm-generator"
+    ],
+    "config": {
+        "platform": {
+            "php": "8.0"
+        }
+    },
+    "require": {
+        "nette/php-generator": "^4.0",
+        "nette/utils": "^3.2"
+    },
+    "require-dev": {
+        "nextras/orm": "^4.0"
+    },
+    "license": "Apache-2.0",
+    "autoload": {
+        "psr-4": {
+            "Contember\\NextrasOrmGenerator\\": "src/"
+        }
+    }
+}
