@@ -34,6 +34,7 @@ class MapperGenerator
 		$class->setComment($this->generateMapperDocComment($classFile->namespace, $entity));
 
 		$collectionClassName = $this->classNames->toShortName($classFile->namespace, $this->classNames->generateCollectionClassName($entity->name));
+		$class->removeMethod('wrapCollection');
 		$wrapCollection = $class->addMethod('wrapCollection');
 		$wrapCollection->setPublic();
 		$wrapCollection->addParameter('collection')->setType(ICollection::class);

@@ -32,6 +32,7 @@ class EnumGenerator
 			$underscored = preg_replace('~([a-z])([A-Z])~', '$1_$2', $value);
 			assert(is_string($underscored));
 			$ucName = strtoupper($underscored);
+			$class->removeConstant($ucName);
 			$class->addConstant($ucName, $value)->setPublic();
 			$class->addComment(sprintf('@method static static %s()', $ucName));
 		}

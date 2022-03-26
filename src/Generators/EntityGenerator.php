@@ -191,16 +191,21 @@ class EntityGenerator
 				$propertyType = $namespace->getUses()[$propertyType] ?? $propertyType;
 
 				$methodName = sprintf('get%sBy%s', ucfirst($field->name), ucfirst($otherField->name));
-				$method = $class->addMethod($methodName);
-				$method->setReturnType($targetEntity);
-				$method->setReturnNullable();
-				$method->addParameter($otherField->name)->setType($propertyType);
-				$method->setBody(sprintf('return $this->%s->getBy([? => $%s]);', $field->name, $otherField->name), [$otherField->name]);
+				if (!$class->hasMethod($methodName)) {
+					$method = $class->addMethod($methodName);
+					$method->setReturnType($targetEntity);
+					$method->setReturnNullable();
+					$method->addParameter($otherField->name)->setType($propertyType);
+					$method->setBody(sprintf('return $this->%s->getBy([? => $%s]);', $field->name, $otherField->name), [$otherField->name]);
+				}
 
-				$method = $class->addMethod($methodName . 'Checked');
-				$method->setReturnType($targetEntity);
-				$method->addParameter($otherField->name)->setType($propertyType);
-				$method->setBody(sprintf('return $this->%s->getByChecked([? => $%s]);', $field->name, $otherField->name), [$otherField->name]);
+				$methodName2 = $methodName . 'Checked';
+				if (!$class->hasMethod($methodName2)) {
+					$method = $class->addMethod($methodName2);
+					$method->setReturnType($targetEntity);
+					$method->addParameter($otherField->name)->setType($propertyType);
+					$method->setBody(sprintf('return $this->%s->getByChecked([? => $%s]);', $field->name, $otherField->name), [$otherField->name]);
+				}
 			}
 		}
 	}

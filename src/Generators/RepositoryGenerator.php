@@ -31,6 +31,7 @@ class RepositoryGenerator
 		$class->setComment($this->generateRepositoryDocComment($classFile->namespace, $entity));
 
 		$entityClassName = $this->classNames->toShortName($classFile->namespace, $this->classNames->generateEntityClassName($entity->name));
+		$class->removeMethod('getEntityClassNames');
 		$getEntityClassNames = $class->addMethod('getEntityClassNames');
 		$getEntityClassNames->setStatic();
 		$getEntityClassNames->setReturnType('array');
