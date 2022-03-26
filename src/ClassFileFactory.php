@@ -45,7 +45,7 @@ class ClassFileFactory
 			$class = ClassType::from($className);
 			$namespace->add($class);
 
-			foreach ($class->methods as $method) {
+			foreach ($class->getMethods() as $method) {
 				$methodReflection = new \ReflectionMethod($className, $method->getName());
 				$methodLines = array_slice($lines, $methodReflection->getStartLine() - 0, $methodReflection->getEndLine() - $methodReflection->getStartLine() - 1);
 				$methodBody = Strings::replace(Strings::after(implode("\n", $methodLines), '{') ?? '', '#^\t\t#m', '');
